@@ -18,6 +18,7 @@ interface WhatsAppButtonProps {
   sourcePage?: string;
   size?: "sm" | "md" | "lg";
   className?: string;
+  onContact?: () => void;
 }
 
 export function WhatsAppButton({
@@ -28,6 +29,7 @@ export function WhatsAppButton({
   sourcePage = "unknown",
   size = "md",
   className = "",
+  onContact,
 }: WhatsAppButtonProps) {
   const link = getWhatsAppLink(phone, providerName, trade);
 
@@ -56,6 +58,9 @@ export function WhatsAppButton({
     }).catch(() => {
       // Silent fail — never block WhatsApp opening
     });
+
+    // Trigger callback (e.g. to show share prompt)
+    onContact?.();
   };
 
   return (

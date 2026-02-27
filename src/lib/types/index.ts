@@ -58,6 +58,8 @@ export interface Provider {
   idVerified: boolean;
   verifiedAt?: string;
   idVerificationMethod?: 'phone' | 'id_document' | 'in_person';
+  // Computed from reviews
+  recommendPct?: number;  // % of reviewers who would recommend (0-100)
 }
 
 // --- Review ---

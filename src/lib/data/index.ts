@@ -53,6 +53,7 @@ function mapProviderFromDB(row: any): Provider {
     idVerified: row.id_verified ?? false,
     verifiedAt: row.verified_at || undefined,
     idVerificationMethod: row.id_verification_method || undefined,
+    recommendPct: row.recommend_pct ?? undefined,
   };
 }
 

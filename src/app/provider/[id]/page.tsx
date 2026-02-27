@@ -16,6 +16,7 @@ import {
   Briefcase,
   MessageSquare,
   FileText,
+  ThumbsUp,
 } from "lucide-react";
 import { fetchProviderById, fetchReviewsForProvider } from "@/lib/data";
 import { getTradeById } from "@/lib/data/trades";
@@ -23,10 +24,10 @@ import { getAreaById } from "@/lib/data/areas";
 import { formatPriceRange } from "@/lib/utils/pricing";
 import { TradeIcon } from "@/components/ui/TradeIcon";
 import { StarRating } from "@/components/ui/StarRating";
-import { WhatsAppButton } from "@/components/providers/WhatsAppButton";
 import { ShareButton } from "@/components/providers/ShareButton";
 import { WorkPhotoGallery } from "@/components/providers/WorkPhotoGallery";
 import { TrustBadge } from "@/components/providers/TrustBadge";
+import { ProfileContactBar } from "@/components/providers/ProfileContactBar";
 
 // Dynamic SEO metadata
 export async function generateMetadata({
@@ -128,6 +129,9 @@ export default async function ProviderProfilePage({
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const recentReviewCount = reviews.filter(r => new Date(r.createdAt) > thirtyDaysAgo).length;
+  const recommendPct = reviews.length > 0
+    ? Math.round((reviews.filter(r => r.wouldRecommend).length / reviews.length) * 100)
+    : null;
   const trades = provider.trades.map((id) => getTradeById(id)).filter(Boolean);
   const areas = provider.areas.map((id) => getAreaById(id)).filter(Boolean);
   const primaryTrade = trades[0];
@@ -265,13 +269,19 @@ export default async function ProviderProfilePage({
               </div>
 
               {/* Rating + Trust Tier */}
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <StarRating
                   rating={provider.avgRating}
                   reviewCount={provider.reviewCount}
                   size="md"
                 />
                 <TrustBadge provider={provider} size="md" />
+                {recommendPct != null && recommendPct > 0 && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-green-600 bg-brand-green-50 px-2 py-0.5 rounded-full">
+                    <ThumbsUp className="w-3 h-3" />
+                    {recommendPct}% recommend
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -450,28 +460,15 @@ export default async function ProviderProfilePage({
         </div>
       </div>
 
-      {/* Sticky bottom bar — WhatsApp + Quote */}
+      {/* Sticky bottom bar — WhatsApp + Quote + Share Prompt */}
       {provider.phone && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 z-50">
-          <div className="max-w-3xl mx-auto flex gap-2">
-            <WhatsAppButton
-              phone={provider.phone}
-              providerName={provider.name}
-              trade={primaryTrade?.localName}
-              providerId={provider.id}
-              sourcePage="profile"
-              size="lg"
-              className="flex-1 justify-center"
-            />
-            <Link
-              href={`/request-quote?trade=${primaryTrade?.id || ""}&provider=${encodeURIComponent(provider.name)}`}
-              className="flex items-center justify-center gap-1.5 px-4 py-3 bg-brand-gold-400 hover:bg-brand-gold-500 text-gray-900 font-semibold text-sm rounded-xl transition-colors whitespace-nowrap"
-            >
-              <FileText className="w-4 h-4" />
-              Get Quote
-            </Link>
-          </div>
-        </div>
+        <ProfileContactBar
+          phone={provider.phone}
+          providerName={provider.name}
+          tradeName={primaryTrade?.localName}
+          tradeId={primaryTrade?.id}
+          providerId={provider.id}
+        />
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { ArrowLeft, SlidersHorizontal, UserPlus, AlertTriangle, RefreshCw } from "lucide-react";
+import { ArrowLeft, UserPlus, AlertTriangle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { TRADES } from "@/lib/data/trades";
 import { getAreasByRegion, getAreaById } from "@/lib/data/areas";
@@ -48,7 +48,6 @@ function SearchContent() {
   const [sortBy, setSortBy] = useState<"rating" | "reviews" | "newest">("rating");
   const [availableNow, setAvailableNow] = useState(false);
   const [bitOnly, setBitOnly] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
 
   const areasByRegion = getAreasByRegion();
   const selectedTradeData = TRADES.find((t) => t.id === selectedTrade);
@@ -123,121 +122,103 @@ function SearchContent() {
 
   return (
     <div className="min-h-screen bg-surface-warm">
-      {/* Header bar */}
+      {/* Header bar + always-visible filters */}
       <div className="bg-white border-b border-gray-100 sticky top-14 z-40">
         <div className="max-w-5xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="p-1 -ml-1 text-text-muted hover:text-text-primary"
-                aria-label="Back to home"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div className="flex items-center gap-2">
-                {selectedTradeData && (
-                  <TradeIcon tradeId={selectedTradeData.id} size="sm" />
-                )}
-                <div>
-                  <h1 className="font-semibold text-sm">
-                    {selectedTradeData
-                      ? selectedTradeData.localName
-                      : "All Trades"}
-                  </h1>
-                  <p className="text-xs text-text-muted">
-                    {selectedAreaData
-                      ? selectedAreaData.name
-                      : "All Areas"}{" "}
-                    · {loading ? "…" : `${results.length} found`}
-                  </p>
-                </div>
+          <div className="flex items-center gap-3 mb-3">
+            <Link
+              href="/"
+              className="p-1 -ml-1 text-text-muted hover:text-text-primary"
+              aria-label="Back to home"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex items-center gap-2">
+              {selectedTradeData && (
+                <TradeIcon tradeId={selectedTradeData.id} size="sm" />
+              )}
+              <div>
+                <h1 className="font-semibold text-sm">
+                  {selectedTradeData
+                    ? selectedTradeData.localName
+                    : "All Trades"}
+                </h1>
+                <p className="text-xs text-text-muted">
+                  {selectedAreaData
+                    ? selectedAreaData.name
+                    : "All Areas"}{" "}
+                  · {loading ? "…" : `${results.length} found`}
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-lg transition-colors ${
-                showFilters
-                  ? "bg-brand-green-50 text-brand-green-600"
-                  : "text-text-muted hover:text-text-primary"
-              }`}
-              aria-label={showFilters ? "Hide filters" : "Show filters"}
-              aria-expanded={showFilters}
-            >
-              <SlidersHorizontal className="w-5 h-5" />
-            </button>
           </div>
 
-          {/* Filter panel */}
-          {showFilters && (
-            <div className="mt-3 pt-3 border-t border-gray-100 pb-1">
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <select
-                  value={selectedTrade}
-                  onChange={(e) => setSelectedTrade(e.target.value)}
-                  className="input-field text-sm !py-2"
-                >
-                  <option value="">All Trades</option>
-                  {TRADES.map((trade) => (
-                    <option key={trade.id} value={trade.id}>
-                      {trade.localName}
+          {/* Filters — always visible */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <select
+              value={selectedTrade}
+              onChange={(e) => setSelectedTrade(e.target.value)}
+              className="input-field text-sm !py-2"
+            >
+              <option value="">All Trades</option>
+              {TRADES.map((trade) => (
+                <option key={trade.id} value={trade.id}>
+                  {trade.localName}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedArea}
+              onChange={(e) => setSelectedArea(e.target.value)}
+              className="input-field text-sm !py-2"
+            >
+              <option value="">All Areas</option>
+              {Object.entries(areasByRegion).map(([region, areas]) => (
+                <optgroup key={region} label={region}>
+                  {areas.map((area) => (
+                    <option key={area.id} value={area.id}>
+                      {area.name}
                     </option>
                   ))}
-                </select>
+                </optgroup>
+              ))}
+            </select>
+          </div>
 
-                <select
-                  value={selectedArea}
-                  onChange={(e) => setSelectedArea(e.target.value)}
-                  className="input-field text-sm !py-2"
-                >
-                  <option value="">All Areas</option>
-                  {Object.entries(areasByRegion).map(([region, areas]) => (
-                    <optgroup key={region} label={region}>
-                      {areas.map((area) => (
-                        <option key={area.id} value={area.id}>
-                          {area.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </div>
+          <div className="flex flex-wrap items-center gap-2 pb-1">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="text-xs bg-surface-muted px-3 py-1.5 rounded-full border border-gray-200"
+            >
+              <option value="rating">Top Rated</option>
+              <option value="reviews">Most Reviews</option>
+              <option value="newest">Newest</option>
+            </select>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="text-xs bg-surface-muted px-3 py-1.5 rounded-full border border-gray-200"
-                >
-                  <option value="rating">Top Rated</option>
-                  <option value="reviews">Most Reviews</option>
-                  <option value="newest">Newest</option>
-                </select>
+            <button
+              onClick={() => setAvailableNow(!availableNow)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                availableNow
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  : "bg-surface-muted border-gray-200 text-text-muted"
+              }`}
+            >
+              🟢 Available Now
+            </button>
 
-                <button
-                  onClick={() => setAvailableNow(!availableNow)}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                    availableNow
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                      : "bg-surface-muted border-gray-200 text-text-muted"
-                  }`}
-                >
-                  🟢 Available Now
-                </button>
-
-                <button
-                  onClick={() => setBitOnly(!bitOnly)}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                    bitOnly
-                      ? "bg-brand-gold-50 border-brand-gold-200 text-brand-gold-800"
-                      : "bg-surface-muted border-gray-200 text-text-muted"
-                  }`}
-                >
-                  🎓 BIT Certified
-                </button>
-              </div>
-            </div>
-          )}
+            <button
+              onClick={() => setBitOnly(!bitOnly)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                bitOnly
+                  ? "bg-brand-gold-50 border-brand-gold-200 text-brand-gold-800"
+                  : "bg-surface-muted border-gray-200 text-text-muted"
+              }`}
+            >
+              🎓 BIT Certified
+            </button>
+          </div>
         </div>
       </div>
 

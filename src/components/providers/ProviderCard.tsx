@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Calendar, CheckCircle, ShieldCheck, GraduationCap, CircleDot, DollarSign, ChevronRight } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, ShieldCheck, GraduationCap, CircleDot, DollarSign, ChevronRight, ThumbsUp } from "lucide-react";
 import { Provider } from "@/lib/types";
 import { getTradeById } from "@/lib/data/trades";
 import { getAreaById } from "@/lib/data/areas";
-import { formatPriceRange } from "@/lib/utils/pricing";
+import { formatGYD } from "@/lib/utils/pricing";
 import { TradeIcon } from "@/components/ui/TradeIcon";
 import { StarRating } from "@/components/ui/StarRating";
 import { WhatsAppButton } from "./WhatsAppButton";
@@ -99,12 +99,18 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             </div>
 
             {/* Rating + Trust Tier */}
-            <div className="mt-2.5 flex items-center gap-2">
+            <div className="mt-2.5 flex items-center gap-2 flex-wrap">
               <StarRating
                 rating={provider.avgRating}
                 reviewCount={provider.reviewCount}
               />
               <TrustBadge provider={provider} size="sm" />
+              {provider.recommendPct != null && provider.recommendPct > 0 && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-green-600 bg-brand-green-50 px-1.5 py-0.5 rounded-full">
+                  <ThumbsUp className="w-2.5 h-2.5" />
+                  {provider.recommendPct}% recommend
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -131,11 +137,11 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             </div>
           )}
 
-          {provider.priceRangeLow && provider.priceRangeHigh && (
+          {provider.priceRangeLow && (
             <div className="flex items-center gap-1.5 text-text-muted">
               <DollarSign className="w-3.5 h-3.5 flex-shrink-0" />
               <span className="text-xs">
-                {formatPriceRange(provider.priceRangeLow, provider.priceRangeHigh)}
+                From {formatGYD(provider.priceRangeLow)}
               </span>
             </div>
           )}

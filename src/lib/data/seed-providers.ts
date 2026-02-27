@@ -423,6 +423,22 @@ export function getReviewsForProvider(providerId: string): Review[] {
   return SEED_REVIEWS.filter((r) => r.providerId === providerId);
 }
 
+// Helper: compute recommend percentage from reviews
+function computeRecommendPct(providerId: string): number | undefined {
+  const reviews = getReviewsForProvider(providerId);
+  if (reviews.length === 0) return undefined;
+  const recommendCount = reviews.filter((r) => r.wouldRecommend).length;
+  return Math.round((recommendCount / reviews.length) * 100);
+}
+
+// Helper: enrich providers with recommendPct
+function enrichProviders(providers: Provider[]): Provider[] {
+  return providers.map((p) => ({
+    ...p,
+    recommendPct: computeRecommendPct(p.id),
+  }));
+}
+
 // Helper: search providers
 export function searchProviders(filters: {
   trade?: string;
@@ -478,5 +494,5 @@ export function searchProviders(filters: {
       });
   }
 
-  return results;
+  return enrichProviders(results);
 }
