@@ -526,14 +526,14 @@ export default async function HomePage() {
                 Not sure who to call?
               </h2>
               <p className="text-green-200/90 text-sm md:text-base leading-relaxed max-w-md">
-                Describe your job and we&apos;ll match you with available tradespeople. Free, fast, no obligation.
+                Describe your job and we&apos;ll match you with up to 3 verified tradespeople. Free quotes, no obligation.
               </p>
             </div>
             <Link
               href="/request-quote"
               className="bg-brand-gold-400 hover:bg-brand-gold-500 text-gray-900 font-bold px-8 py-4 rounded-xl text-base transition-colors flex items-center gap-2 whitespace-nowrap shadow-lg shadow-brand-gold-400/20"
             >
-              Request a Free Quote <ArrowRight className="w-5 h-5" />
+              Get 3 Free Quotes <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
         </div>

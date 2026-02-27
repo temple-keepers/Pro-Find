@@ -8,6 +8,7 @@
 
 import { Provider, Review, SearchFilters } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
+import { getSlotLimit } from "@/lib/data/trust";
 
 const HAS_SUPABASE =
   typeof process !== "undefined" &&
@@ -49,6 +50,9 @@ function mapProviderFromDB(row: any): Provider {
     updatedAt: row.updated_at,
     source: row.source || undefined,
     sourceDetail: row.source_detail || undefined,
+    idVerified: row.id_verified ?? false,
+    verifiedAt: row.verified_at || undefined,
+    idVerificationMethod: row.id_verification_method || undefined,
   };
 }
 
@@ -218,4 +222,42 @@ export async function fetchRecentReviews(limit = 6): Promise<(Review & { provide
   }
   allReviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   return allReviews.slice(0, limit);
+}
+
+export interface SlotUsage {
+  filled: number;
+  limit: number;
+  tradeId: string;
+  area?: string;
+}
+
+export async function fetchSlotUsage(tradeId: string, area?: string): Promise<SlotUsage> {
+  const limit = getSlotLimit(tradeId);
+
+  if (HAS_SUPABASE) {
+    const supabase = createClient();
+    let query = supabase
+      .from("providers")
+      .select("id", { count: "exact", head: true })
+      .contains("trades", [tradeId])
+      .eq("is_verified", true);
+
+    if (area) {
+      query = query.contains("areas", [area]);
+    }
+
+    const { count } = await query;
+    return { filled: count || 0, limit, tradeId, area };
+  }
+
+  // Seed fallback
+  const { SEED_PROVIDERS } = await import("@/lib/data/seed-providers");
+  let candidates = SEED_PROVIDERS.filter(
+    (p) => p.trades.includes(tradeId) && p.isVerified
+  );
+  if (area) {
+    const areaFiltered = candidates.filter((p) => p.areas.includes(area));
+    if (areaFiltered.length > 0) candidates = areaFiltered;
+  }
+  return { filled: candidates.length, limit, tradeId, area };
 }

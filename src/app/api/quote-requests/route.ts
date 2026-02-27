@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/roles";
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from "@/lib/auth/rate-limit";
+import { matchProviders } from "@/lib/data/matching";
 
 // POST - customer submits a quote request
 export async function POST(request: NextRequest) {
@@ -48,7 +49,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to submit quote request" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, id: data.id });
+    // Match up to 3 verified providers for this request
+    let matchResult = { providers: [], matchCount: 0 } as Awaited<ReturnType<typeof matchProviders>>;
+    try {
+      matchResult = await matchProviders(trade, customerArea || null);
+
+      // Store match results in the quote_request record
+      if (matchResult.matchCount > 0) {
+        await supabase
+          .from("quote_requests")
+          .update({
+            matched_providers: matchResult.providers.map((p) => ({
+              id: p.id,
+              avgRating: p.avgRating,
+              reviewCount: p.reviewCount,
+              yearsExperience: p.yearsExperience,
+              isVerified: p.isVerified,
+              idVerified: p.idVerified,
+            })),
+            match_count: matchResult.matchCount,
+          })
+          .eq("id", data.id);
+      }
+    } catch (matchError) {
+      // Matching is non-critical — quote request still succeeds
+      console.error("Provider matching error:", matchError);
+    }
+
+    // Return anonymized match data (no names/phones) to show on success screen
+    return NextResponse.json({
+      success: true,
+      id: data.id,
+      matchCount: matchResult.matchCount,
+      matchedProviders: matchResult.providers.map((p) => ({
+        avgRating: p.avgRating,
+        reviewCount: p.reviewCount,
+        yearsExperience: p.yearsExperience,
+        isVerified: p.isVerified,
+        idVerified: p.idVerified,
+      })),
+    });
   } catch (error) {
     console.error("Quote request API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -3,9 +3,17 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, Send, CheckCircle, AlertCircle, Loader2, Phone, User, MapPin, FileText, DollarSign, Clock } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, AlertCircle, Loader2, Phone, User, MapPin, FileText, DollarSign, Clock, Star, ShieldCheck, Shield, Award } from "lucide-react";
 import { TRADES } from "@/lib/data/trades";
 import { getAreasByRegion } from "@/lib/data/areas";
+
+interface AnonymizedMatch {
+  avgRating: number;
+  reviewCount: number;
+  yearsExperience?: number;
+  isVerified: boolean;
+  idVerified: boolean;
+}
 
 const BUDGET_RANGES = [
   { id: "under_50k", label: "Under $50,000" },
@@ -27,6 +35,8 @@ function RequestQuoteForm() {
   const searchParams = useSearchParams();
   const areasByRegion = getAreasByRegion();
   const [submitted, setSubmitted] = useState(false);
+  const [matchCount, setMatchCount] = useState(0);
+  const [matchedProviders, setMatchedProviders] = useState<AnonymizedMatch[]>([]);
 
   // Pre-fill from URL params (e.g. from provider profile "Get Quote" button)
   const tradeParam = searchParams.get("trade") || "";
@@ -71,6 +81,8 @@ function RequestQuoteForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to submit");
 
+      setMatchCount(data.matchCount || 0);
+      setMatchedProviders(data.matchedProviders || []);
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -79,14 +91,89 @@ function RequestQuoteForm() {
   };
 
   if (submitted) {
+    const tradeName = TRADES.find((t) => t.id === trade)?.localName || "tradesperson";
+
     return (
-      <div className="min-h-screen bg-surface-warm flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <CheckCircle className="w-16 h-16 text-brand-green-500 mx-auto mb-4" />
-          <h1 className="font-display text-2xl mb-2">Quote Request Sent!</h1>
-          <p className="text-sm text-text-secondary mb-6">
-            Pro tradespeople in your area will see your request and reach out via WhatsApp. Expect responses within a few hours.
-          </p>
+      <div className="min-h-screen bg-surface-warm flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full">
+          {/* Success header */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-brand-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-9 h-9 text-brand-green-500" />
+            </div>
+            {matchCount > 0 ? (
+              <>
+                <h1 className="font-display text-2xl mb-2">
+                  Matched with {matchCount} Verified {tradeName}{matchCount > 1 ? "s" : ""}!
+                </h1>
+                <p className="text-sm text-text-secondary">
+                  We found {matchCount} verified {tradeName}{matchCount > 1 ? "s" : ""} in your area. They&apos;ll review your job and reach out via WhatsApp.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="font-display text-2xl mb-2">Quote Request Sent!</h1>
+                <p className="text-sm text-text-secondary">
+                  Pro tradespeople in your area will see your request and reach out via WhatsApp. Expect responses within a few hours.
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Matched provider cards (anonymized — no names/phones) */}
+          {matchedProviders.length > 0 && (
+            <div className="space-y-3 mb-8">
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider text-center">
+                Your Matched Pros
+              </p>
+              {matchedProviders.map((p, idx) => (
+                <div
+                  key={idx}
+                  className="card p-4 border border-gray-100 flex items-center gap-4"
+                >
+                  {/* Avatar placeholder */}
+                  <div className="w-12 h-12 rounded-full bg-brand-green-100 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-brand-green-600" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-sm">Pro #{idx + 1}</span>
+                      {p.idVerified && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-brand-green-50 text-brand-green-700 border border-brand-green-200">
+                          <ShieldCheck className="w-3 h-3" /> ID Verified
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-text-secondary">
+                      <span className="flex items-center gap-1">
+                        <Star className="w-3 h-3 text-brand-gold-500 fill-brand-gold-500" />
+                        {p.avgRating.toFixed(1)}
+                      </span>
+                      <span>{p.reviewCount} review{p.reviewCount !== 1 ? "s" : ""}</span>
+                      {p.yearsExperience && (
+                        <span>{p.yearsExperience}yr exp</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <Award className="w-5 h-5 text-brand-gold-500 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* What happens next */}
+          <div className="card p-5 border border-brand-green-200 bg-brand-green-50/50 mb-6">
+            <p className="font-semibold text-sm mb-2">What happens next?</p>
+            <ol className="text-sm text-text-secondary space-y-1.5 list-decimal list-inside">
+              <li>Matched pros review your job details</li>
+              <li>They contact you via WhatsApp with quotes</li>
+              <li>You compare and choose — no obligation</li>
+            </ol>
+          </div>
+
+          {/* Actions */}
           <div className="flex gap-3 justify-center">
             <Link href="/" className="btn-secondary text-sm">Back to Home</Link>
             <Link href="/search" className="btn-primary text-sm">Browse Tradespeople</Link>
@@ -105,8 +192,8 @@ function RequestQuoteForm() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="font-semibold">Request Quotes</h1>
-            <p className="text-xs text-text-muted">Describe your job, get responses from pros</p>
+            <h1 className="font-semibold">Get 3 Free Quotes</h1>
+            <p className="text-xs text-text-muted">Describe your job, get matched with verified pros</p>
           </div>
         </div>
       </div>
@@ -115,7 +202,7 @@ function RequestQuoteForm() {
         {/* Callout */}
         <div className="card p-4 border border-brand-green-200 bg-brand-green-50/50 mb-6">
           <p className="text-sm text-brand-green-800">
-            <strong>How it works:</strong> Describe your job and trusted Pro tradespeople will contact you via WhatsApp with their quotes. Free for you — no obligation.
+            <strong>How it works:</strong> Describe your job and we&apos;ll match you with up to 3 verified tradespeople. They&apos;ll contact you via WhatsApp with quotes. Free — no obligation.
           </p>
         </div>
 

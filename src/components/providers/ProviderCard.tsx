@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Clock, CheckCircle, GraduationCap, CircleDot, DollarSign, ChevronRight } from "lucide-react";
+import { MapPin, Calendar, CheckCircle, ShieldCheck, GraduationCap, CircleDot, DollarSign, ChevronRight } from "lucide-react";
 import { Provider } from "@/lib/types";
 import { getTradeById } from "@/lib/data/trades";
 import { getAreaById } from "@/lib/data/areas";
@@ -8,6 +8,7 @@ import { formatPriceRange } from "@/lib/utils/pricing";
 import { TradeIcon } from "@/components/ui/TradeIcon";
 import { StarRating } from "@/components/ui/StarRating";
 import { WhatsAppButton } from "./WhatsAppButton";
+import { TrustBadge } from "./TrustBadge";
 
 interface ProviderCardProps {
   provider: Provider;
@@ -67,12 +68,17 @@ export function ProviderCard({ provider }: ProviderCardProps) {
                   {provider.name}
                 </span>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
-                  {provider.isVerified && (
+                  {provider.idVerified ? (
+                    <span className="badge-verified">
+                      <ShieldCheck className="w-3 h-3" />
+                      ID Verified
+                    </span>
+                  ) : provider.isVerified ? (
                     <span className="badge-verified">
                       <CheckCircle className="w-3 h-3" />
                       Verified
                     </span>
-                  )}
+                  ) : null}
                   {provider.bitCertified && (
                     <span className="badge-bit">
                       <GraduationCap className="w-3 h-3" />
@@ -92,12 +98,13 @@ export function ProviderCard({ provider }: ProviderCardProps) {
               )}
             </div>
 
-            {/* Rating */}
-            <div className="mt-2.5">
+            {/* Rating + Trust Tier */}
+            <div className="mt-2.5 flex items-center gap-2">
               <StarRating
                 rating={provider.avgRating}
                 reviewCount={provider.reviewCount}
               />
+              <TrustBadge provider={provider} size="sm" />
             </div>
           </div>
         </div>
@@ -133,12 +140,12 @@ export function ProviderCard({ provider }: ProviderCardProps) {
             </div>
           )}
 
-          {provider.responseTime && (
-            <div className="flex items-center gap-1.5 text-text-muted">
-              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="text-xs">{provider.responseTime}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 text-text-muted">
+            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="text-xs">
+              Since {new Date(provider.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+            </span>
+          </div>
         </div>
       </Link>
 

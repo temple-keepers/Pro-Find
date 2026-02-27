@@ -10,9 +10,10 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { TRADES } from "@/lib/data/trades";
-import { fetchProviders } from "@/lib/data";
+import { fetchProviders, fetchSlotUsage } from "@/lib/data";
 import { TradeIcon } from "@/components/ui/TradeIcon";
 import { ProviderCard } from "@/components/providers/ProviderCard";
+import { SlotIndicator } from "@/components/providers/SlotIndicator";
 
 // Generate all trade pages at build time
 export async function generateStaticParams() {
@@ -54,10 +55,10 @@ export default async function TradeLandingPage({
   const trade = TRADES.find((t) => t.id === params.slug);
   if (!trade) notFound();
 
-  const providers = await fetchProviders({
-    trade: trade.id,
-    sortBy: "rating",
-  });
+  const [providers, slotUsage] = await Promise.all([
+    fetchProviders({ trade: trade.id, sortBy: "rating" }),
+    fetchSlotUsage(trade.id),
+  ]);
   const topProviders = providers.slice(0, 6);
 
   const siteUrl =
@@ -137,12 +138,22 @@ export default async function TradeLandingPage({
             </div>
           </div>
 
-          <p className="text-green-200/90 text-base max-w-2xl mb-8 leading-relaxed">
+          <p className="text-green-200/90 text-base max-w-2xl mb-6 leading-relaxed">
             {trade.description}. Browse rated and reviewed{" "}
             {trade.localName.toLowerCase()}s across Georgetown and all of
             Guyana. Read real reviews, check their work photos, and WhatsApp
             them directly.
           </p>
+
+          {/* Slot usage indicator */}
+          <div className="mb-8">
+            <SlotIndicator
+              filled={slotUsage.filled}
+              limit={slotUsage.limit}
+              tradeName={trade.localName}
+              variant="hero"
+            />
+          </div>
 
           <Link
             href={`/search?trade=${trade.id}`}

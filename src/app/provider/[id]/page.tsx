@@ -7,6 +7,7 @@ import {
   MapPin,
   Clock,
   CheckCircle,
+  ShieldCheck,
   GraduationCap,
   CircleDot,
   DollarSign,
@@ -25,6 +26,7 @@ import { StarRating } from "@/components/ui/StarRating";
 import { WhatsAppButton } from "@/components/providers/WhatsAppButton";
 import { ShareButton } from "@/components/providers/ShareButton";
 import { WorkPhotoGallery } from "@/components/providers/WorkPhotoGallery";
+import { TrustBadge } from "@/components/providers/TrustBadge";
 
 // Dynamic SEO metadata
 export async function generateMetadata({
@@ -123,6 +125,9 @@ export default async function ProviderProfilePage({
   }
 
   const reviews = await fetchReviewsForProvider(provider.id);
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const recentReviewCount = reviews.filter(r => new Date(r.createdAt) > thirtyDaysAgo).length;
   const trades = provider.trades.map((id) => getTradeById(id)).filter(Boolean);
   const areas = provider.areas.map((id) => getAreaById(id)).filter(Boolean);
   const primaryTrade = trades[0];
@@ -223,18 +228,27 @@ export default async function ProviderProfilePage({
 
               {/* Badges */}
               <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {provider.isVerified && (
+                {provider.idVerified ? (
+                  <span className="badge-verified">
+                    <ShieldCheck className="w-3 h-3" />
+                    ID Verified
+                    {provider.verifiedAt && (
+                      <span className="text-[10px] opacity-75 ml-0.5">
+                        since {new Date(provider.verifiedAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                      </span>
+                    )}
+                  </span>
+                ) : provider.isVerified ? (
                   <span className="badge-verified">
                     <CheckCircle className="w-3 h-3" />
                     Verified
                   </span>
-                )}
-                {provider.isClaimed && !provider.isVerified && (
+                ) : provider.isClaimed ? (
                   <span className="badge-claimed">
                     <CheckCircle className="w-3 h-3" />
                     Claimed
                   </span>
-                )}
+                ) : null}
                 {provider.bitCertified && (
                   <span className="badge-bit">
                     <GraduationCap className="w-3 h-3" />
@@ -250,13 +264,14 @@ export default async function ProviderProfilePage({
                 )}
               </div>
 
-              {/* Rating */}
-              <div className="mt-2">
+              {/* Rating + Trust Tier */}
+              <div className="mt-2 flex items-center gap-2">
                 <StarRating
                   rating={provider.avgRating}
                   reviewCount={provider.reviewCount}
                   size="md"
                 />
+                <TrustBadge provider={provider} size="md" />
               </div>
             </div>
           </div>
@@ -319,6 +334,18 @@ export default async function ProviderProfilePage({
                 </div>
               </div>
             )}
+
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-surface-muted rounded-lg flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-text-muted" />
+              </div>
+              <div>
+                <p className="text-xs text-text-muted">Member Since</p>
+                <p className="text-sm font-medium">
+                  {new Date(provider.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -374,6 +401,11 @@ export default async function ProviderProfilePage({
             <h2 className="font-semibold text-sm flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-text-muted" />
               Reviews ({reviews.length})
+              {recentReviewCount > 0 && (
+                <span className="text-[10px] bg-brand-green-50 text-brand-green-600 px-2 py-0.5 rounded-full font-bold">
+                  {recentReviewCount} in last 30 days
+                </span>
+              )}
             </h2>
             <Link
               href={`/review/${provider.id}`}

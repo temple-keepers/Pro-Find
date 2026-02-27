@@ -6,9 +6,10 @@ import { ArrowLeft, SlidersHorizontal, UserPlus, AlertTriangle, RefreshCw } from
 import Link from "next/link";
 import { TRADES } from "@/lib/data/trades";
 import { getAreasByRegion, getAreaById } from "@/lib/data/areas";
-import { fetchProviders } from "@/lib/data";
+import { fetchProviders, fetchSlotUsage, type SlotUsage } from "@/lib/data";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { TradeIcon } from "@/components/ui/TradeIcon";
+import { SlotIndicator } from "@/components/providers/SlotIndicator";
 
 function SkeletonCard() {
   return (
@@ -56,6 +57,7 @@ function SearchContent() {
   const [results, setResults] = useState<import("@/lib/types").Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [slotUsage, setSlotUsage] = useState<SlotUsage | null>(null);
 
   const doSearch = useCallback(() => {
     setLoading(true);
@@ -79,6 +81,17 @@ function SearchContent() {
   useEffect(() => {
     doSearch();
   }, [doSearch]);
+
+  // Fetch slot usage when trade is selected
+  useEffect(() => {
+    if (selectedTrade) {
+      fetchSlotUsage(selectedTrade, selectedArea || undefined)
+        .then(setSlotUsage)
+        .catch(() => setSlotUsage(null));
+    } else {
+      setSlotUsage(null);
+    }
+  }, [selectedTrade, selectedArea]);
 
   // Log search to analytics
   const logSearchEvent = useCallback(() => {
@@ -230,6 +243,19 @@ function SearchContent() {
 
       {/* Results */}
       <div className="max-w-5xl mx-auto px-4 py-4">
+        {/* Slot usage indicator */}
+        {slotUsage && selectedTradeData && !loading && (
+          <div className="mb-3">
+            <SlotIndicator
+              filled={slotUsage.filled}
+              limit={slotUsage.limit}
+              tradeName={selectedTradeData.localName}
+              area={selectedAreaData?.name}
+              variant="inline"
+            />
+          </div>
+        )}
+
         {loading ? (
           /* Skeleton loading cards */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

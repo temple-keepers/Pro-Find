@@ -54,6 +54,10 @@ export interface Provider {
   updatedAt: string;
   source: 'seed' | 'suggestion' | 'self_registered';
   sourceDetail?: string;
+  // Trust layer
+  idVerified: boolean;
+  verifiedAt?: string;
+  idVerificationMethod?: 'phone' | 'id_document' | 'in_person';
 }
 
 // --- Review ---

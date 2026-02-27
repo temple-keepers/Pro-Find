@@ -580,6 +580,9 @@ function mapProviderFromDB(row: Record<string, unknown>): Provider {
     updatedAt: row.updated_at as string,
     source: row.source as Provider["source"],
     sourceDetail: row.source_detail as string | undefined,
+    idVerified: (row.id_verified as boolean) ?? false,
+    verifiedAt: row.verified_at as string | undefined,
+    idVerificationMethod: row.id_verification_method as Provider["idVerificationMethod"],
   };
 }
 
