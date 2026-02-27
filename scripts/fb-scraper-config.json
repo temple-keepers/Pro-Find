@@ -1,0 +1,118 @@
+{
+  "name": "ProFind Facebook Scraper",
+  "version": "1.0",
+  "description": "Semi-automated workflow for extracting tradespeople from Guyana Facebook groups",
+  
+  "target_groups": [
+    {
+      "name": "Georgetown Community Group",
+      "url": "https://www.facebook.com/groups/georgetowncommunitygroup",
+      "priority": 1
+    },
+    {
+      "name": "Guyana Buy & Sell",
+      "url": "https://www.facebook.com/groups/guyanaBuySell",
+      "priority": 1
+    },
+    {
+      "name": "East Bank Community Group", 
+      "url": "https://www.facebook.com/groups/eastbankcommunitygroup",
+      "priority": 2
+    },
+    {
+      "name": "Guyanese Helping Guyanese",
+      "url": "https://www.facebook.com/groups/guyaneseHelpingGuyanese",
+      "priority": 2
+    },
+    {
+      "name": "Guyana Services & Recommendations",
+      "url": "https://www.facebook.com/groups/guyanaservices",
+      "priority": 2
+    },
+    {
+      "name": "East Coast Demerara Community",
+      "url": "https://www.facebook.com/groups/eastcoastdemerara",
+      "priority": 3
+    },
+    {
+      "name": "West Bank / West Coast Demerara Community",
+      "url": "https://www.facebook.com/groups/westbankdemerara",
+      "priority": 3
+    }
+  ],
+
+  "search_queries": [
+    "electrician available",
+    "plumber available", 
+    "welder available",
+    "carpenter available",
+    "painter available",
+    "AC repair",
+    "ac technician",
+    "mechanic available",
+    "mason available",
+    "electrical work",
+    "plumbing services",
+    "welding services",
+    "looking for electrician",
+    "looking for plumber",
+    "need a plumber",
+    "need an electrician",
+    "anyone know a good plumber",
+    "anyone know a good electrician",
+    "recommend a plumber",
+    "recommend an electrician"
+  ],
+
+  "phone_patterns": [
+    "592",
+    "\\b6\\d{6}\\b",
+    "\\b2\\d{6}\\b",
+    "\\b\\d{3}[- ]?\\d{4}\\b"
+  ],
+
+  "trade_keywords": {
+    "electrician": ["electrician", "electrical", "wiring", "breaker", "generator hookup", "light install", "fan install", "socket", "outlet"],
+    "plumber": ["plumber", "plumbing", "pipe", "drain", "leak", "toilet", "sink", "faucet", "water tank", "bathroom fix"],
+    "welder": ["welder", "welding", "gate", "grill", "burglar bar", "railing", "fence", "fabrication", "metal work"],
+    "carpenter": ["carpenter", "carpentry", "cabinet", "wardrobe", "furniture", "door", "window frame", "kitchen cabinet", "wood work"],
+    "painter": ["painter", "painting", "interior paint", "exterior paint", "house painting", "wall painting"],
+    "mason": ["mason", "masonry", "block work", "concrete", "foundation", "tiling", "plastering", "construction", "building"],
+    "ac-technician": ["ac ", "a/c", "air condition", "split unit", "ac install", "ac repair", "ac service", "cooling"],
+    "mechanic": ["mechanic", "auto repair", "car repair", "engine", "brake", "transmission", "vehicle service", "car service"]
+  },
+
+  "area_keywords": {
+    "gt-kitty": ["kitty"],
+    "gt-campbellville": ["campbellville", "c/ville"],
+    "gt-subryanville": ["subryanville", "prashad nagar"],
+    "gt-bel-air": ["bel air", "bel-air"],
+    "gt-queenstown": ["queenstown"],
+    "gt-sophia": ["sophia"],
+    "gt-north-ruimveldt": ["north ruimveldt", "n ruimveldt"],
+    "gt-south-ruimveldt": ["south ruimveldt", "s ruimveldt"],
+    "gt-w-ruimveldt": ["west ruimveldt", "w ruimveldt"],
+    "gt-lacytown": ["lacytown", "lacy town"],
+    "gt-stabroek": ["stabroek"],
+    "gt-albouystown": ["albouystown", "alberttown"],
+    "gt-werk-en-rust": ["werk-en-rust"],
+    "gt-roxanne-burnham": ["roxanne burnham"],
+    "gt-turkeyen": ["turkeyen"],
+    "ecd-ogle": ["ogle"],
+    "ecd-plaisance": ["plaisance", "annandale", "foulis"],
+    "ecd-bv": ["bv", "buxton", "beterverwagting", "bel air village"],
+    "ebd-providence": ["providence", "republic park"],
+    "ebd-eccles": ["eccles"],
+    "ebd-diamond": ["diamond"],
+    "ebd-grove": ["grove"],
+    "ebd-houston": ["houston"],
+    "ebd-land-of-canaan": ["land of canaan", "canaan"],
+    "wbd-vreedenhoop": ["vreed-en-hoop", "vreedenhoop", "la grange", "west bank", "west coast"]
+  },
+
+  "profind_api": {
+    "base_url": "http://localhost:3000",
+    "claim_endpoint": "/api/claim",
+    "source": "facebook_scrape"
+  }
+}

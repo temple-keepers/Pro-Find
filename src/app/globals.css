@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface-warm text-text-primary;
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-green-500;
+  }
+
+  /* Selection colors */
+  ::selection {
+    background-color: rgba(0, 158, 73, 0.15);
+    color: #003d1e;
+  }
+}
+
+@layer components {
+  /* Enhanced card with subtle depth */
+  .card {
+    @apply bg-surface-card rounded-2xl shadow-card transition-all duration-300;
+  }
+  @media (hover: hover) {
+    .card:hover {
+      @apply shadow-card-hover -translate-y-0.5;
+    }
+  }
+
+  /* Glass card — for overlays on colored backgrounds */
+  .card-glass {
+    @apply rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-inner-glow;
+  }
+
+  /* Primary button — vibrant with depth */
+  .btn-primary {
+    @apply bg-brand-green-500 text-white font-body font-semibold 
+           px-6 py-3 rounded-xl relative overflow-hidden
+           hover:bg-brand-green-600 active:bg-brand-green-700 active:scale-[0.98]
+           transition-all duration-200 ease-out
+           shadow-md hover:shadow-lg hover:shadow-brand-green-500/20
+           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green-500;
+  }
+
+  /* Secondary button — refined outline */
+  .btn-secondary {
+    @apply bg-white text-text-primary font-body font-medium
+           px-6 py-3 rounded-xl border border-gray-200
+           hover:bg-gray-50 hover:border-gray-300 active:bg-gray-100 active:scale-[0.98]
+           transition-all duration-200;
+  }
+
+  /* WhatsApp button — iconic green with glow */
+  .btn-whatsapp {
+    @apply bg-[#25D366] text-white font-body font-semibold
+           px-6 py-3 rounded-xl
+           hover:bg-[#20BD5A] active:bg-[#1DA851] active:scale-[0.98]
+           transition-all duration-200
+           shadow-md hover:shadow-lg hover:shadow-[#25D366]/25
+           flex items-center justify-center gap-2;
+  }
+
+  /* Gold accent button */
+  .btn-gold {
+    @apply bg-brand-gold-400 text-brand-green-900 font-body font-bold
+           px-6 py-3 rounded-xl
+           hover:bg-brand-gold-300 active:bg-brand-gold-500 active:scale-[0.98]
+           transition-all duration-200
+           shadow-md hover:shadow-lg hover:shadow-brand-gold-400/25;
+  }
+
+  /* Input field — clean with better focus */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 
+           bg-white text-text-primary font-body
+           placeholder:text-text-muted
+           focus-visible:border-brand-green-500 focus-visible:ring-4 focus-visible:ring-brand-green-500/10
+           hover:border-gray-300
+           transition-all duration-200;
+  }
+
+  /* Badge styles — more polished */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide;
+  }
+  .badge-verified {
+    @apply badge bg-brand-green-100 text-brand-green-700 ring-1 ring-brand-green-200;
+  }
+  .badge-claimed {
+    @apply badge bg-blue-50 text-blue-700 ring-1 ring-blue-200;
+  }
+  .badge-bit {
+    @apply badge bg-brand-gold-100 text-brand-gold-800 ring-1 ring-brand-gold-300;
+  }
+  .badge-available {
+    @apply badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200;
+  }
+  .badge-featured {
+    @apply badge bg-gradient-to-r from-brand-gold-100 to-brand-gold-200 text-brand-gold-800 ring-1 ring-brand-gold-300;
+  }
+
+  /* Decorative divider with Guyana colors */
+  .divider-guyana {
+    @apply h-1 rounded-full;
+    background: linear-gradient(90deg, #009E49, #FCD116, #CE1126);
+  }
+
+  /* Section heading with accent line */
+  .section-heading {
+    @apply font-display text-2xl md:text-3xl text-text-primary relative;
+  }
+  .section-heading::after {
+    content: '';
+    @apply block w-12 h-1 bg-brand-gold-400 rounded-full mt-3;
+  }
+  .section-heading-center {
+    @apply section-heading text-center;
+  }
+  .section-heading-center::after {
+    @apply mx-auto;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Grain overlay texture */
+  .texture-grain {
+    position: relative;
+  }
+  .texture-grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Infinite marquee scroll */
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee-scroll 30s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+  .animate-marquee-reverse {
+    animation: marquee-scroll 35s linear infinite reverse;
+  }
+  .animate-marquee-reverse:hover {
+    animation-play-state: paused;
+  }
+
+  /* Dot pattern background */
+  .bg-dots {
+    background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Gradient text */
+  .text-gradient-green {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-green-500 to-brand-green-400;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-gold-500 to-brand-gold-400;
+  }
+}
